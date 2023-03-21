@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import MetaTrader5 as mt5
 
-from mt5 import ForexMarket
+#from mt5 import ForexMarket
 
 if not mt5.initialize():
     print("initialize() failed, error code =", mt5.last_error())
@@ -58,12 +58,13 @@ def group_data(freq, x_df):
     return pd.DataFrame(pd.concat(df_list, axis=0).sort_index())
 
 
-s_sessions = [('01:00', '7:00'), ('07:00', '13:00'), ('13:00', '23:00')]
+s_sessions = [('00:01', '7:00'), ('07:01', '13:00'), ('13:01', '23:59')]
 t_df = session_transform(sessions=s_sessions, x_df=xau)
 # print(t_df.to_numpy())
 # import numpy as np
 
 # print(np.diff(t_df.to_numpy(), axis=0))
-#print(t_df)
 xx_df = group_data('1D', t_df)
+print(xx_df)
+
 xx_df.to_csv('gold.csv',index_label='time')

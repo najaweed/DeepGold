@@ -4,44 +4,44 @@ import pandas as pd
 import numpy as np
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
+from preprocess import NyDiffNormalizer
 
-
-class NyDiffNormalizer:
-    def __init__(self,
-                 df: pd.DataFrame
-                 ):
-        self.df = df
-        # print(self.df)
-        # print(np.diff(self.df.to_numpy(), axis=0))
-        self.ts = np.diff(self.df.to_numpy(), axis=0)  # self.df  # np.diff(self.df.to_numpy(), axis=0)
-        self.scale_normal = None
-        self.min = None
-        # self.obs = self.obs()
-        # self.target = self.target()
-
-    def obs(self):
-        # ts_obs = self.ts.to_numpy()[:-1, :]
-        ts_obs = self.ts[:-1, :]
-
-        # print(ts_obs)
-
-        self.min = ts_obs.min(axis=0, keepdims=True)
-        self.scale_normal = (ts_obs.max(axis=0, keepdims=True) - ts_obs.min(axis=0, keepdims=True))
-        obs = (ts_obs - self.min) / self.scale_normal
-        # print(obs)
-        return obs
-
-    def target(self, drop_open_volume=True):
-        # ts_target = self.df[['high', 'low', 'close']].to_numpy()[-1, :].copy()
-        ts_target = self.ts[-1, 1:-1]
-        # print(ts_target)
-        # target = (ts_target - self.min) / self.scale_normal
-
-        target = (ts_target - self.min[:, 1:-1]) / self.scale_normal[:, 1:-1]
-        # print(target.shape)
-        target = np.clip(target,a_min=0,a_max=1.0)
-        return target
-
+# class NyDiffNormalizer:
+#     def __init__(self,
+#                  df: pd.DataFrame
+#                  ):
+#         self.df = df#.drop(columns=['tick_volume'])
+#         #print(self.df)
+#         # print(np.diff(self.df.to_numpy(), axis=0))
+#         self.ts = np.diff(self.df.to_numpy(), axis=0)  # self.df  # np.diff(self.df.to_numpy(), axis=0)
+#         self.scale_normal = None
+#         self.min = None
+#         # self.obs = self.obs()
+#         # self.target = self.target()
+#
+#     def obs(self):
+#         # ts_obs = self.ts.to_numpy()[:-1, :]
+#         ts_obs = self.ts[:-1, :]
+#
+#         # print(ts_obs)
+#
+#         self.min = ts_obs.min(axis=0, keepdims=True)
+#         self.scale_normal = (ts_obs.max(axis=0, keepdims=True) - ts_obs.min(axis=0, keepdims=True))
+#         obs = (ts_obs - self.min) / self.scale_normal
+#         # print(obs)
+#         return obs
+#
+#     def target(self, drop_open_volume=True):
+#         # ts_target = self.df[['high', 'low', 'close']].to_numpy()[-1, :].copy()
+#         ts_target = self.ts[-1, 1:-1]
+#         # print(ts_target)
+#         # target = (ts_target - self.min) / self.scale_normal
+#
+#         target = (ts_target - self.min[:, 1:-1]) / self.scale_normal[:, 1:-1]
+#         # print(target.shape)
+#         target = np.clip(target,a_min=0,a_max=1.0)
+#         return target
+#
 
 class NyDataset(Dataset):
     def __init__(self,
@@ -60,7 +60,7 @@ class NyDataset(Dataset):
         return self.obs.shape[0]
 
     def __getitem__(self, index):
-        return self.obs[index, ...], self.target[index, ...]
+        return self.obs[index, ...], self.target[index]
 
     def split_observation_prediction(self):
         x, y = [], []
@@ -75,7 +75,7 @@ class NyDataset(Dataset):
             target = ny_normal.target()
             if t == 0:
                 in_shape = obs.shape
-                target_shape = target.shape
+                target_shape = target[0].shape
             # print(obs.shape,target.shape)
 
             if target_shape == target_shape and obs.shape == in_shape:
@@ -87,8 +87,8 @@ class NyDataset(Dataset):
         # print(x, y)
 
         # breakpoint()
-        x, y = torch.tensor(np.array(x, dtype=np.float32), dtype=torch.float32), torch.tensor(
-            np.array(y, dtype=np.float32), dtype=torch.float32)
+        x = torch.tensor(np.array(x, dtype=np.float32), dtype=torch.float32)
+        #y = torch.tensor(np.array(y, dtype=np.float32), dtype=torch.float32)
         return x, y
 
 
@@ -101,16 +101,13 @@ class LitNyData(pl.LightningDataModule, ):
         super().__init__()
         self.config = config
         self.df = df
-        self.train_loader, self.val_loader, self.test_loader = self._gen_data_loaders()
+        self.train_loader, self.val_loader = self._gen_data_loaders()
 
     def train_dataloader(self):
         return self.train_loader
 
     def val_dataloader(self):
         return self.val_loader
-
-    def test_dataloader(self):
-        return self.test_loader
 
     def _gen_data_loaders(self):
         split_index = [int(self.df.shape[0] * self.config['split'][i] / 10) for i in range(len(self.config['split']))]
@@ -129,3 +126,5 @@ class LitNyData(pl.LightningDataModule, ):
                                            ))
             start_index = end_index
         return data_loaders
+
+

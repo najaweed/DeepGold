@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from LitTorch.models.InceptionTime import InceptionBlock
+from models.InceptionTime import InceptionBlock
 
 
 class CausalRnn(nn.Module):
@@ -24,7 +24,6 @@ class CausalRnn(nn.Module):
         self.dropout0 = nn.Dropout(config['dropout'])
         self.linear = nn.Linear(in_features=4 * config['hidden_channels'],
                                 out_features=config['output_size'])
-        #self.linear = nn.LazyLinear(out_features=config['output_size'])
         #self.activ = nn.ReLU()
     #     self.init_weights()
     #

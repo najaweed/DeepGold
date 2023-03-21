@@ -23,11 +23,18 @@ class LitNetModel(pl.LightningModule, ):
     def training_step(self, train_batch, batch_idx):
         # prepare inputs
         x = train_batch[0]
-        target = torch.flatten(train_batch[1], start_dim=1)
+        #target = torch.flatten(train_batch[1], start_dim=1)
         # process model
         x = self.nn_model(x)
         # criterion
-        loss = torch.sqrt(self.loss(x, target))
+
+        target = train_batch[1][0]
+        scale = train_batch[1][1]
+        min = train_batch[1][2]
+        x = x.T
+        x = x*scale + min
+
+        loss = torch.sqrt(self.loss(x.T, target))
         # logger
         metrics = {'loss': loss, }
         self.log_dict(metrics)
@@ -36,11 +43,19 @@ class LitNetModel(pl.LightningModule, ):
     def validation_step(self, val_batch, batch_idx):
         # prepare inputs
         x = val_batch[0]
-        target = torch.flatten(val_batch[1], start_dim=1)
+        #target = torch.flatten(val_batch[1], start_dim=1)
         # process model
         x = self.nn_model(x)
         # criterion
-        loss = torch.sqrt(self.loss(x, target))
+        x = x.T
+        target = val_batch[1][0]
+        scale = val_batch[1][1]
+        min = val_batch[1][2]
+
+        x = x*scale + min
+
+
+        loss = torch.sqrt(self.loss(x.T, target))
         # logger
         metrics = {'val_loss': loss, }
         print('val_loss', loss)

@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from LitTorch.models.CausalConv1d import CausalConv1d
+from models.CausalConv1d import CausalConv1d
 
 
 class Inception(nn.Module):
@@ -79,20 +79,20 @@ class InceptionBlock(nn.Module):
         self.activation = nn.ReLU()
         self.inception_1 = Inception(
             in_channels=in_channels,
-            kernel_sizes=kernel_sizes,
+            kernel_sizes=kernel_sizes[0],
             bottleneck_channels=bottleneck_channels,
             hidden_channels=hidden_channels
         )
         self.inception_2 = Inception(
-            in_channels=in_channels,  # 4 * hidden_channels,
-            kernel_sizes=kernel_sizes,
+            in_channels=4 * hidden_channels,  # in_channels,  #
+            kernel_sizes=kernel_sizes[1],
             bottleneck_channels=bottleneck_channels,
             hidden_channels=hidden_channels
 
         )
         self.inception_3 = Inception(
-            in_channels=in_channels,  # 4 * hidden_channels,
-            kernel_sizes=kernel_sizes,
+            in_channels=4 * hidden_channels,  # in_channels,  #
+            kernel_sizes=kernel_sizes[2],
             bottleneck_channels=bottleneck_channels,
             hidden_channels=hidden_channels
 
@@ -103,8 +103,10 @@ class InceptionBlock(nn.Module):
 
     def forward(self, x):
         x1 = self.inception_1(x)
-        x2 = x1 + self.dropout1(self.inception_2(x))
-        x3 = x2 + self.dropout2(self.inception_3(x))
+        # x2 = x1 + self.dropout1(self.inception_2(x))
+        # x3 = x2 + self.dropout2(self.inception_3(x))
+        x2 = self.inception_2(x1)  # self.dropout1(self.inception_2(x1))
+        x3 = self.inception_3(x2)  # self.dropout2(self.inception_3(x2))
         # x = x + self.residual(x)
         x4 = self.activation(x3)
 
