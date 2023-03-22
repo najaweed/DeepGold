@@ -15,7 +15,7 @@ config_data_loader = {
     # config dataset and dataloader
     'batch_size': 16,
     'tick_per_day': 3,
-    'number_days': 80,
+    'number_days': 160,
     'split': (9, 1),  # make a function for K-fold validationb
 }
 # FIND MODEL CONFIG BASED ON DATALOADER
@@ -24,8 +24,8 @@ lit_val = lit_data.val_loader
 in_shape, out_shape = None, None
 
 config_CasualRnn = {
-    'bottleneck_channels': 256,
-    'hidden_channels': 64,
+    'bottleneck_channels': 32,
+    'hidden_channels': 8,
     'kernel_sizes': ((2, 4, 8), (3, 5, 7), (8, 16, 32)),
     'num_stack_layers': 1,
     'dropout': 0.4,
