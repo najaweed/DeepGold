@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-from LitTorch.models.deep_residual_network import DeepGCNLayer
-
 
 class ResCnn(nn.Module):
     def __init__(self,
@@ -10,45 +8,31 @@ class ResCnn(nn.Module):
                  ):
         super(ResCnn, self).__init__()
 
-        self.first_layer = torch.nn.Sequential(
-            nn.Conv2d(config['in_channels'],
-                      config['hidden_channels'],
-                      kernel_size=(3, 3), padding=(2, 2), dilation=(2, 2),
-                      bias=False),
-            #    nn.Tanh(),
-        )
-
-        self.residual_block = nn.ModuleList()
-        for i in range(1, config['num_res_layers']):
-            conv = nn.Conv2d(config['hidden_channels'], config['hidden_channels'],
-                             kernel_size=(3, 3), padding=(2, 2), dilation=(2, 2))
-            norm = nn.BatchNorm2d(config['hidden_channels'], )
-            act = nn.ReLU(inplace=True)
-            layer = DeepGCNLayer(conv, norm, act, block='res',)# dropout=0.4, )
-            self.residual_block.append(layer)
-
-        self.last_layer = torch.nn.Sequential(
-            nn.Conv2d(config['hidden_channels'],
-                      config['out_channels'],
-                      kernel_size=config['kernel_last'],
-                      bias=False),
-        #    nn.Tanh(),
-        )
-
     def forward(self, x):
-        x = self.first_layer(x)
-        for layer in self.residual_block.children():
-            x = layer(x)
-        x = self.last_layer(x)
+        print(x)
+        mean_0 = torch.mean(x[:, :, :], dim=1, keepdim=True)
+        print(mean_0)
+        x = (x-mean_0)
+        print(x)
+        mean_1 = torch.mean(x[:, 20:30, :], dim=1, keepdim=True)
+        print(mean_1)
+        x = (x[:, 20:30, :] - mean_1)
+        mean_2 = torch.mean(x[:, 5:10, :], dim=1, keepdim=True)
+        print(mean_2)
+        x = (x[:, 5:10, :] - mean_2)
+
+        print(x)
         return x
 
-# from models.ResCnn import ResCnn
-# model = ResCnn(config_conv)
-# x = model(sample_input)
-# print(x.shape)
-# print(model)
-# print(sample_input.shape)
-# print(x)
-# from torchinfo import summary
-#
-# summary(model, input_size=sample_input.shape)
+
+import pandas as pd
+
+df = pd.read_csv('gold.csv', )  # , parse_dates=True)
+df['time'] = pd.to_datetime(df['time'])
+df.set_index('time', inplace=True)
+x_in = torch.from_numpy(df.iloc[-3 * 10:, :-1].to_numpy())
+x_in = x_in.reshape(1, *x_in.size())
+# x_in = torch.tensor(x_in, dtype=torch.float32)
+print(x_in.shape)
+model = ResCnn({})
+model(x_in)

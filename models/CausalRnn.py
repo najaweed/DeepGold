@@ -16,6 +16,13 @@ class CausalRnn(nn.Module):
             kernel_sizes=config['kernel_sizes'],
             dropout=config['dropout'],
         )
+        self.inception1 = InceptionBlock(
+            in_channels=4 * config['hidden_channels'],
+            bottleneck_channels=config['bottleneck_channels'],
+            hidden_channels=config['hidden_channels'],
+            kernel_sizes=config['kernel_sizes'],
+            dropout=config['dropout'],
+        )
         self.lstm = nn.LSTM(input_size=4 * config['hidden_channels'],
                             hidden_size=4 * config['hidden_channels'],
                             num_layers=config['num_stack_layers'],
@@ -41,7 +48,9 @@ class CausalRnn(nn.Module):
         # Inception
         x = torch.permute(x, (0, 2, 1))
         x = self.inception(x)
+        x = x + self.inception1(x)
         x = self.dropout0(x)
+
         x = torch.permute(x, (0, 2, 1))  # to [batch , seq_time , channels]
         # Recurrent
         h0 = torch.zeros(self.config['num_stack_layers'], batch_size,

@@ -99,7 +99,7 @@ window = config['number_days'] * config['tick_per_day']
 input_to_predict = xx_df  # df.iloc[-1 * window:].copy()
 print(input_to_predict)
 # nydiff = NyDiffNormalizer(ohlc)
-proc = NyDiffNormalizer(input_to_predict.iloc[:-1, :])
+proc = NyDiffNormalizer(input_to_predict.iloc[:, :])
 nn_input_numpy = proc.obs()  # add dummy dim for batch
 nn_input_torch = torch.from_numpy(np.expand_dims(nn_input_numpy, 0)).type(torch.float32)
 print(nn_input_torch.shape)

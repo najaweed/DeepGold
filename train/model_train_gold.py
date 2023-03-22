@@ -14,7 +14,7 @@ import pickle
 df = pd.read_csv('smooth_gold.csv', )  # , parse_dates=True)
 df['time'] = pd.to_datetime(df['time'])
 df.set_index('time', inplace=True)
-#df = df.iloc[:1000,:]
+# df = df.iloc[:1000,:]
 # config = {}
 with open('gold_config_CasualRnn.pkl', 'rb') as f:
     config = pickle.load(f)
