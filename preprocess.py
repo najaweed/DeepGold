@@ -10,7 +10,7 @@ class NyDiffNormalizer:
         # 0-1 min-max Normal
         self.scale_normal = None
         self.min = None
-
+        self.trend_speed = None
         self.ndf = self.ohlc_normal_df()
         # self.tech = self.technical_indicators(window_temporal=15)
         self.x_df = self.ndf.copy()  # pd.concat([self.ndf,self.tech],axis=1)
@@ -22,14 +22,33 @@ class NyDiffNormalizer:
     def target(self, ):
         ts_target = self.df[['high', 'low', 'close']].to_numpy()[-1, :].copy()
         # print(self.df[['open']].to_numpy()[-1, :].copy()[0])
-        return ts_target, self.scale_normal, self.df[['open']].to_numpy()[-1, :].copy()[0]
+        return ts_target, self.scale_normal, self.df[['open']].to_numpy()[-1, :].copy()[0] + self.trend_speed
 
     def ohlc_normal_df(self, ):
-        n_df = self.df[['open', 'high', 'low', 'close']].iloc[:-1, :].copy()
+        d_df = self.df_de_trend(self.df)
+        n_df = d_df.iloc[:-1, :].copy()
         self.min = n_df.low.min()
         self.scale_normal = (n_df.high.max() - n_df.low.min())
         n_df = (n_df - self.min) / self.scale_normal
         return n_df
+
+
+    def df_de_trend(self,in_df):
+        x = in_df[['open', 'high', 'low', 'close']].mean(axis=1).to_numpy()
+        #print(x)
+        y = np.arange(0, len(x))
+        m_b = np.polyfit(y, x, 1)
+        m, b = m_b[0], m_b[1]
+        self.trend_speed = m
+        #print(m, b)
+        y_hat = m * y + b
+        x_df = in_df[['open', 'high', 'low', 'close']].copy()
+        # x_df['y_hat'] = y_hat
+        # print(x_df['y_hat'])
+        #print(len(in_df))
+        #print(len(y_hat))
+        #print(len(x))
+        return x_df.sub(y_hat, axis='index')
 
     def prediction_to_ohlc_df(self, nn_prediction: np.ndarray):
         # inverse normalizer
@@ -129,14 +148,16 @@ class NyDiffNormalizer:
         # df = df.join(Chaikin)
         return Chaikin.fillna(method='bfill')
 
-#
-# import matplotlib.pyplot as plt
-#
+
+import matplotlib.pyplot as plt
+
 # # # #
 # xdf = pd.read_csv('smooth_gold.csv', )  # , parse_dates=True)
 # xdf['time'] = pd.to_datetime(xdf['time'])
-# # xdf.set_index('time', inplace=True)
+# xdf.set_index('time', inplace=True)
 # ohlc = xdf.iloc[-6 * 20:-1 * 20, :]
 # nydiff = NyDiffNormalizer(ohlc)
-# print(nydiff.obs().shape)
-# print(nydiff.prediction_to_ohlc_df(np.array([0.1,0.5,0.2])))
+# # print(nydiff.obs().shape)
+# # print(nydiff.prediction_to_ohlc_df(np.array([0.1,0.5,0.2])))
+# print(nydiff.scale_normal)
+#

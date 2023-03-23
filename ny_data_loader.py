@@ -122,7 +122,8 @@ class LitNyData(pl.LightningDataModule, ):
                                            # num_workers=4,
                                            drop_last=True,
                                            # pin_memory=True,
-                                           shuffle=True,
+                                           shuffle=False,
+
                                            ))
             start_index = end_index
         return data_loaders

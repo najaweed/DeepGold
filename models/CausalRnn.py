@@ -16,51 +16,45 @@ class CausalRnn(nn.Module):
             kernel_sizes=config['kernel_sizes'],
             dropout=config['dropout'],
         )
-        self.inception1 = InceptionBlock(
-            in_channels=4 * config['hidden_channels'],
-            bottleneck_channels=config['bottleneck_channels'],
-            hidden_channels=config['hidden_channels'],
-            kernel_sizes=config['kernel_sizes'],
-            dropout=config['dropout'],
-        )
-        self.inception2 = InceptionBlock(
-            in_channels=4 * config['hidden_channels'],
-            bottleneck_channels=config['bottleneck_channels'],
-            hidden_channels=config['hidden_channels'],
-            kernel_sizes=config['kernel_sizes'],
-            dropout=config['dropout'],
-        )
+
         self.lstm = nn.LSTM(input_size=4 * config['hidden_channels'],
                             hidden_size=config['output_size'],
                             num_layers=config['num_stack_layers'],
                             batch_first=True)
         self.dropout = nn.Dropout(config['dropout'])
         self.dropout0 = nn.Dropout(config['dropout'])
-        self.linear = nn.Linear(in_features=4 * config['hidden_channels'],
-                                out_features=config['output_size'])
-        self.batch_norm1 = nn.BatchNorm1d(num_features=config['in_channels'])
+
+        self.batch_norm = nn.BatchNorm1d(num_features=config['in_channels'])
         self.avg_pool = nn.MaxPool1d(kernel_size=config['kernel_avg'],)
         # self.activ = nn.ReLU()
 
-    #     self.init_weights()
-    #
-    # def init_weights(self):
-    #     for name, param in self.lstm.named_parameters():
-    #         if 'bias' in name:
-    #             nn.init.constant_(param, 0.0)
-    #         elif 'weight_ih' in name:
-    #             nn.init.kaiming_normal_(param)
-    #         elif 'weight_hh' in name:
-    #             nn.init.orthogonal_(param)
+        self.init_weights()
 
+    def init_weights(self):
+        for name, param in self.lstm.named_parameters():
+            if 'bias' in name:
+                nn.init.constant_(param, 0.0)
+            elif 'weight_ih' in name:
+                nn.init.kaiming_normal_(param)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param)
+        for name, param in self.inception.named_parameters():
+            nn.init.constant_(param, 0.0)
+        for name, param in self.batch_norm.named_parameters():
+            nn.init.constant_(param, 0.0)
+
+            # if 'bias' in name:
+            #     print(name)
+            #     nn.init.constant_(param, 0.0)
+            # elif 'conv' in name:
+            #     print(name)
+            #     nn.init.constant_(param, 0.0)
     def forward(self, x):
         batch_size = x.shape[0]
         # Inception
         x = torch.permute(x, (0, 2, 1))
-        x = self.batch_norm1(x)
+        x = self.batch_norm(x)
         x = self.inception(x)
-        #x = x + self.inception1(x)
-        #x = x + self.inception2(x)
         x = self.avg_pool(x)
         x = self.dropout0(x)
 
@@ -72,7 +66,6 @@ class CausalRnn(nn.Module):
         c0 = torch.zeros(self.config['num_stack_layers'], batch_size,
                          1 * self.config['output_size'], ).requires_grad_()
         lstm_out, (h_n, c_n) = self.lstm(x, (h0.detach(), c0.detach()))
-        #print(lstm_out[:, -1, :])
         return lstm_out[:, -1, :]
 
 # x_in = torch.rand(1, 120, 4)
@@ -89,3 +82,6 @@ class CausalRnn(nn.Module):
 # model = CausalRnn(x_config)
 # out = model(x_in)
 # print(out.shape)
+# for name,param in model.named_parameters():
+#     print(name)
+#     print(param)
