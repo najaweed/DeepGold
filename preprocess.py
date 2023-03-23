@@ -21,11 +21,11 @@ class NyDiffNormalizer:
 
     def target(self, ):
         ts_target = self.df[['high', 'low', 'close']].to_numpy()[-1, :].copy()
-
-        return ts_target , self.scale_normal,self.min
+        # print(self.df[['open']].to_numpy()[-1, :].copy()[0])
+        return ts_target, self.scale_normal, self.df[['open']].to_numpy()[-1, :].copy()[0]
 
     def ohlc_normal_df(self, ):
-        n_df = self.df[['open', 'high', 'low', 'close']].copy()
+        n_df = self.df[['open', 'high', 'low', 'close']].iloc[:-1, :].copy()
         self.min = n_df.low.min()
         self.scale_normal = (n_df.high.max() - n_df.low.min())
         n_df = (n_df - self.min) / self.scale_normal

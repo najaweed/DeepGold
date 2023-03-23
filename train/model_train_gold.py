@@ -22,14 +22,13 @@ with open('gold_config_CasualRnn.pkl', 'rb') as f:
 
 logger = TensorBoardLogger("tb_logs", name="gold_model")
 trainer = pl.Trainer(
-    gpus=0,
+    #gpus=0,
     logger=logger,
     # max_epochs=10,
     # log_every_n_steps=50,
 )
 print(config)
-config['learning_rate'] = 1e-3
-# config['number_days'] = 20
+config['learning_rate'] = 1e-2
 
 if __name__ == '__main__':
     data_module = LitNyData(df, config)
