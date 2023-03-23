@@ -28,7 +28,7 @@ trainer = pl.Trainer(
     # log_every_n_steps=50,
 )
 print(config)
-config['learning_rate'] = 1e-2
+config['learning_rate'] = 1e-3
 
 if __name__ == '__main__':
     data_module = LitNyData(df, config)

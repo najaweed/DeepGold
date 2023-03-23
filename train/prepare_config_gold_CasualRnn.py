@@ -24,11 +24,11 @@ lit_val = lit_data.val_loader
 in_shape, out_shape = None, None
 
 config_CasualRnn = {
-    'bottleneck_channels': 128,
-    'hidden_channels': 32,
+    'bottleneck_channels': 16,
+    'hidden_channels': 8,
     'kernel_sizes': ((10, 20, 40), (10, 20, 40), (10, 20, 40)),
     'num_stack_layers': 1,
-    'dropout': 0.1,
+    'dropout': 0.25,
     'kernel_avg':4,
 }
 in_sample = None
