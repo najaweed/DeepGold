@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader
-from preprocess import NyDiffNormalizer
+from pre_process import NyDiffNormalizer
 
 # class NyDiffNormalizer:
 #     def __init__(self,
@@ -88,7 +88,7 @@ class NyDataset(Dataset):
 
         # breakpoint()
         x = torch.tensor(np.array(x, dtype=np.float32), dtype=torch.float32)
-        #y = torch.tensor(np.array(y, dtype=np.float32), dtype=torch.float32)
+        y = torch.tensor(np.array(y, dtype=np.float32), dtype=torch.float32)
         return x, y
 
 

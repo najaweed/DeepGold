@@ -27,14 +27,8 @@ class LitNetModel(pl.LightningModule, ):
         # process model
         x = self.nn_model(x)
         # criterion
-
-        target = train_batch[1][0]
-        scale = train_batch[1][1]
-        min = train_batch[1][2]
-        x = x.T
-        x = x*scale + min
-
-        loss = torch.sqrt(self.loss(x.T, target))
+        target = train_batch[1]
+        loss = torch.sqrt(self.loss(x, target))
         # logger
         metrics = {'loss': loss, }
         self.log_dict(metrics)
@@ -47,15 +41,8 @@ class LitNetModel(pl.LightningModule, ):
         # process model
         x = self.nn_model(x)
         # criterion
-        x = x.T
-        target = val_batch[1][0]
-        scale = val_batch[1][1]
-        min = val_batch[1][2]
-
-        x = x*scale + min
-
-
-        loss = torch.sqrt(self.loss(x.T, target))
+        target = val_batch[1]
+        loss = torch.sqrt(self.loss(x, target))
         # logger
         metrics = {'val_loss': loss, }
         print('val_loss', loss)

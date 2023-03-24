@@ -13,7 +13,7 @@ df = df.iloc[:1000, :]
 # READ DATA
 config_data_loader = {
     # config dataset and dataloader
-    'batch_size': 1,
+    'batch_size': 32,
     'tick_per_day': 3,
     'number_days': 20,
     'split': (9, 1),  # make a function for K-fold validationb
@@ -24,8 +24,8 @@ lit_val = lit_data.val_loader
 in_shape, out_shape = None, None
 
 config_CasualRnn = {
-    'bottleneck_channels': 8,
-    'hidden_channels': 2,
+    'bottleneck_channels': 128,
+    'hidden_channels': 32,
     'kernel_sizes': ((10, 20, 40), (10, 20, 40), (10, 20, 40)),
     'num_stack_layers': 1,
     'dropout': 0.4,

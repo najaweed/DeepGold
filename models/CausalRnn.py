@@ -16,12 +16,35 @@ class CausalRnn(nn.Module):
             kernel_sizes=config['kernel_sizes'],
             dropout=config['dropout'],
         )
-
+        self.inception1 = InceptionBlock(
+            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            bottleneck_channels=config['bottleneck_channels'],
+            hidden_channels=config['hidden_channels'],
+            kernel_sizes=config['kernel_sizes'],
+            dropout=config['dropout'],
+        )
+        self.inception2 = InceptionBlock(
+            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            bottleneck_channels=config['bottleneck_channels'],
+            hidden_channels=config['hidden_channels'],
+            kernel_sizes=config['kernel_sizes'],
+            dropout=config['dropout'],
+        )
+        self.inception3 = InceptionBlock(
+            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            bottleneck_channels=config['bottleneck_channels'],
+            hidden_channels=config['hidden_channels'],
+            kernel_sizes=config['kernel_sizes'],
+            dropout=config['dropout'],
+        )
         self.lstm = nn.LSTM(input_size=4 * config['hidden_channels'],
                             hidden_size=config['output_size'],
                             num_layers=config['num_stack_layers'],
                             batch_first=True)
-        self.dropout = nn.Dropout(config['dropout'])
+        self.dropout1 = nn.Dropout(config['dropout'])
+        self.dropout2 = nn.Dropout(config['dropout'])
+        self.dropout3 = nn.Dropout(config['dropout'])
+
         self.dropout0 = nn.Dropout(config['dropout'])
 
         self.batch_norm = nn.BatchNorm1d(num_features=config['in_channels'])
@@ -39,22 +62,25 @@ class CausalRnn(nn.Module):
             elif 'weight_hh' in name:
                 nn.init.orthogonal_(param)
         for name, param in self.inception.named_parameters():
-            nn.init.constant_(param, 0.0)
+            nn.init.normal_(param, mean=0, std=1)
+        for name, param in self.inception1.named_parameters():
+            nn.init.constant_(param, 0.0)  # .normal_(param, mean=0, std=0.01)
+        for name, param in self.inception2.named_parameters():
+            nn.init.constant_(param, 0.0)#.normal_(param, mean=0, std=0.01)
+        for name, param in self.inception3.named_parameters():
+            nn.init.constant_(param, 0.0)#.normal_(param, mean=0, std=0.01)
         for name, param in self.batch_norm.named_parameters():
             nn.init.constant_(param, 0.0)
-
-            # if 'bias' in name:
-            #     print(name)
-            #     nn.init.constant_(param, 0.0)
-            # elif 'conv' in name:
-            #     print(name)
-            #     nn.init.constant_(param, 0.0)
     def forward(self, x):
         batch_size = x.shape[0]
         # Inception
         x = torch.permute(x, (0, 2, 1))
-        x = self.batch_norm(x)
-        x = self.inception(x)
+        x0 = self.batch_norm(x)
+        x = self.inception(x0)
+        x = x + self.dropout1(self.inception1(x0))
+        #x = x + self.dropout2(self.inception2(x0))
+        #x = x + self.dropout3(self.inception3(x0))
+
         x = self.avg_pool(x)
         x = self.dropout0(x)
 
@@ -82,6 +108,4 @@ class CausalRnn(nn.Module):
 # model = CausalRnn(x_config)
 # out = model(x_in)
 # print(out.shape)
-# for name,param in model.named_parameters():
-#     print(name)
-#     print(param)
+

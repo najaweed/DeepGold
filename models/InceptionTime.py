@@ -97,9 +97,7 @@ class InceptionBlock(nn.Module):
             hidden_channels=hidden_channels
 
         )
-        self.dropout1 = nn.Dropout(dropout)
-        self.dropout2 = nn.Dropout(dropout)
-        self.dropout3 = nn.Dropout(dropout)
+
 
     def forward(self, x):
         x1 = self.inception_1(x)

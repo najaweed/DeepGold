@@ -62,91 +62,91 @@ class NyDiffNormalizer:
         p_df['close'] = normal_prediction[2]  # + self.ohlc_obs['close'][-1]
 
         return p_df
-
-    def technical_indicators(self, window_temporal: int = 10):
-        df_tech = pd.DataFrame()
-        df_tech['STO'] = self.stochastic_oscillator_d(window_temporal)
-        # df_tech['ACD'] = self.accumulation_distribution(window_temporal)
-        df_tech['TSI'] = self.true_strength_index(int(window_temporal / 2), window_temporal)
-        df_tech['MSI'] = self.mass_index()
-        df_tech['FRI'] = self.force_index(window_temporal)
-        df_tech['EOM'] = self.ease_of_movement(window_temporal)
-        df_tech['CHI'] = self.chaikin_oscillator()
-        df_tech = (df_tech - df_tech.min()) / (df_tech.max() - df_tech.min())
-        # print(df_tech)
-        return df_tech
-
-    def stochastic_oscillator_d(self, n: int = 20):
-        """Calculate stochastic oscillator %D for given data.
-        """
-        df = self.df.copy()
-        SOk = (df['close'] - df['low']) / (df['high'] - df['low'])
-        SOd = SOk.ewm(span=n, min_periods=n).mean()
-        return SOd.fillna(method='bfill')
-
-    def mass_index(self):
-        """Calculate the Mass Index for given data.
-        """
-        df = self.df.copy()
-        Range = df['high'] - df['low']
-        EX1 = Range.ewm(span=9, min_periods=9).mean()
-        EX2 = EX1.ewm(span=9, min_periods=9).mean()
-        Mass = EX1 / EX2
-        MassI = Mass.rolling(25).sum()
-        # df = df.join(MassI)
-        return MassI.fillna(method='bfill')
-
-    def true_strength_index(self, r=10, s=20):
-        """Calculate True Strength Index (TSI) for given data.
-        """
-        df = self.df.copy()
-        M = pd.Series(df['close'].diff(1))
-        aM = abs(M)
-        EMA1 = M.ewm(span=r, min_periods=r).mean()
-        aEMA1 = aM.ewm(span=r, min_periods=r).mean()
-        EMA2 = EMA1.ewm(span=s, min_periods=s).mean()
-        aEMA2 = aEMA1.ewm(span=s, min_periods=s).mean()
-        TSI = EMA2 / aEMA2
-        # df = df.join(TSI)
-        return TSI.fillna(method='bfill')
-
-    def accumulation_distribution(self, n=20):
-        """Calculate Accumulation/Distribution for given data.
-        """
-        df = self.df.copy()
-        ad = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['tick_volume']
-        M = ad.diff(n - 1)
-        N = ad.shift(n - 1)
-        ROC = M / N
-        return ROC.fillna(method='bfill')
-
-    def force_index(self, n=20):
-        """Calculate Force Index for given data.
-        """
-        df = self.df.copy()
-        F = df['close'].diff(n) * df['tick_volume'].diff(n)
-        # df = df.join(F)
-        return F.fillna(method='bfill')
-
-    def ease_of_movement(self, n=20):
-        """Calculate Ease of Movement for given data.
-        """
-        df = self.df.copy()
-
-        EoM = (df['high'].diff(1) + df['low'].diff(1)) * (df['high'] - df['low']) / (2 * df['tick_volume'])
-        Eom_ma = EoM.rolling(n, min_periods=n).mean()
-        # df = df.join(Eom_ma)
-        return Eom_ma.fillna(method='bfill')
-
-    def chaikin_oscillator(self, r=10, s=20):
-        """Calculate Chaikin Oscillator for given data.
-        """
-        df = self.df.copy()
-
-        ad = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['tick_volume']
-        Chaikin = ad.ewm(span=3, min_periods=3).mean() - ad.ewm(span=10, min_periods=10).mean()
-        # df = df.join(Chaikin)
-        return Chaikin.fillna(method='bfill')
+    #
+    # def technical_indicators(self, window_temporal: int = 10):
+    #     df_tech = pd.DataFrame()
+    #     df_tech['STO'] = self.stochastic_oscillator_d(window_temporal)
+    #     # df_tech['ACD'] = self.accumulation_distribution(window_temporal)
+    #     df_tech['TSI'] = self.true_strength_index(int(window_temporal / 2), window_temporal)
+    #     df_tech['MSI'] = self.mass_index()
+    #     df_tech['FRI'] = self.force_index(window_temporal)
+    #     df_tech['EOM'] = self.ease_of_movement(window_temporal)
+    #     df_tech['CHI'] = self.chaikin_oscillator()
+    #     df_tech = (df_tech - df_tech.min()) / (df_tech.max() - df_tech.min())
+    #     # print(df_tech)
+    #     return df_tech
+    #
+    # def stochastic_oscillator_d(self, n: int = 20):
+    #     """Calculate stochastic oscillator %D for given data.
+    #     """
+    #     df = self.df.copy()
+    #     SOk = (df['close'] - df['low']) / (df['high'] - df['low'])
+    #     SOd = SOk.ewm(span=n, min_periods=n).mean()
+    #     return SOd.fillna(method='bfill')
+    #
+    # def mass_index(self):
+    #     """Calculate the Mass Index for given data.
+    #     """
+    #     df = self.df.copy()
+    #     Range = df['high'] - df['low']
+    #     EX1 = Range.ewm(span=9, min_periods=9).mean()
+    #     EX2 = EX1.ewm(span=9, min_periods=9).mean()
+    #     Mass = EX1 / EX2
+    #     MassI = Mass.rolling(25).sum()
+    #     # df = df.join(MassI)
+    #     return MassI.fillna(method='bfill')
+    #
+    # def true_strength_index(self, r=10, s=20):
+    #     """Calculate True Strength Index (TSI) for given data.
+    #     """
+    #     df = self.df.copy()
+    #     M = pd.Series(df['close'].diff(1))
+    #     aM = abs(M)
+    #     EMA1 = M.ewm(span=r, min_periods=r).mean()
+    #     aEMA1 = aM.ewm(span=r, min_periods=r).mean()
+    #     EMA2 = EMA1.ewm(span=s, min_periods=s).mean()
+    #     aEMA2 = aEMA1.ewm(span=s, min_periods=s).mean()
+    #     TSI = EMA2 / aEMA2
+    #     # df = df.join(TSI)
+    #     return TSI.fillna(method='bfill')
+    #
+    # def accumulation_distribution(self, n=20):
+    #     """Calculate Accumulation/Distribution for given data.
+    #     """
+    #     df = self.df.copy()
+    #     ad = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['tick_volume']
+    #     M = ad.diff(n - 1)
+    #     N = ad.shift(n - 1)
+    #     ROC = M / N
+    #     return ROC.fillna(method='bfill')
+    #
+    # def force_index(self, n=20):
+    #     """Calculate Force Index for given data.
+    #     """
+    #     df = self.df.copy()
+    #     F = df['close'].diff(n) * df['tick_volume'].diff(n)
+    #     # df = df.join(F)
+    #     return F.fillna(method='bfill')
+    #
+    # def ease_of_movement(self, n=20):
+    #     """Calculate Ease of Movement for given data.
+    #     """
+    #     df = self.df.copy()
+    #
+    #     EoM = (df['high'].diff(1) + df['low'].diff(1)) * (df['high'] - df['low']) / (2 * df['tick_volume'])
+    #     Eom_ma = EoM.rolling(n, min_periods=n).mean()
+    #     # df = df.join(Eom_ma)
+    #     return Eom_ma.fillna(method='bfill')
+    #
+    # def chaikin_oscillator(self, r=10, s=20):
+    #     """Calculate Chaikin Oscillator for given data.
+    #     """
+    #     df = self.df.copy()
+    #
+    #     ad = (2 * df['close'] - df['high'] - df['low']) / (df['high'] - df['low']) * df['tick_volume']
+    #     Chaikin = ad.ewm(span=3, min_periods=3).mean() - ad.ewm(span=10, min_periods=10).mean()
+    #     # df = df.join(Chaikin)
+    #     return Chaikin.fillna(method='bfill')
 
 
 import matplotlib.pyplot as plt

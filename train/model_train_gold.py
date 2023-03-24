@@ -24,11 +24,12 @@ logger = TensorBoardLogger("tb_logs", name="gold_model")
 trainer = pl.Trainer(
     #gpus=0,
     logger=logger,
-    # max_epochs=10,
+    max_epochs=40,
     # log_every_n_steps=50,
 )
 print(config)
-config['learning_rate'] = 1e-3
+config['learning_rate'] = 3e-3
+#config['batch_size'] = 4
 
 if __name__ == '__main__':
     data_module = LitNyData(df, config)
