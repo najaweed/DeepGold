@@ -7,11 +7,14 @@ class LitNetModel(pl.LightningModule, ):
     def __init__(self,
                  net_model,
                  config: dict,
+                 is_encoder=False,
                  ):
         super().__init__()
 
         # configuration
+        self.config = config
         self.lr = config['learning_rate']
+        self.is_encoder = is_encoder
         # model initialization
         self.nn_model = net_model(config)
         self.loss = torch.nn.MSELoss()
@@ -22,13 +25,21 @@ class LitNetModel(pl.LightningModule, ):
 
     def training_step(self, train_batch, batch_idx):
         # prepare inputs
-        x = train_batch[0]
-        #target = torch.flatten(train_batch[1], start_dim=1)
+        x_in = train_batch[0]
+        x_in = torch.permute(x_in, (0, 2, 1))
+
+        # target = torch.flatten(train_batch[1], start_dim=1)
         # process model
-        x = self.nn_model(x)
+        x = self.nn_model(x_in)
         # criterion
         target = train_batch[1]
-        loss = torch.sqrt(self.loss(x, target))
+        if self.config['step_share'] >0:
+            target = torch.permute(target, (0, 2, 1))
+        if self.is_encoder:
+            loss = torch.sqrt(self.loss(x, x_in))
+        else:
+            loss = torch.sqrt(self.loss(x, target))
+
         # logger
         metrics = {'loss': loss, }
         self.log_dict(metrics)
@@ -36,13 +47,21 @@ class LitNetModel(pl.LightningModule, ):
 
     def validation_step(self, val_batch, batch_idx):
         # prepare inputs
-        x = val_batch[0]
-        #target = torch.flatten(val_batch[1], start_dim=1)
+        x_in = val_batch[0]
+        x_in = torch.permute(x_in, (0, 2, 1))
+
+        # target = torch.flatten(val_batch[1], start_dim=1)
         # process model
-        x = self.nn_model(x)
+        x = self.nn_model(x_in)
         # criterion
         target = val_batch[1]
-        loss = torch.sqrt(self.loss(x, target))
+        if self.config['step_share'] >0:
+            target = torch.permute(target, (0, 2, 1))
+        if self.is_encoder:
+            loss = torch.sqrt(self.loss(x, x_in))
+        else:
+            loss = torch.sqrt(self.loss(x, target))
+
         # logger
         metrics = {'val_loss': loss, }
         print('val_loss', loss)

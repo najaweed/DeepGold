@@ -1,3 +1,5 @@
+import numpy as np
+
 from ny_data_loader import LitNyData
 
 import pandas as pd
@@ -13,23 +15,34 @@ df = df.iloc[:1000, :]
 # READ DATA
 config_data_loader = {
     # config dataset and dataloader
-    'batch_size': 32,
+    'batch_size': 4,
+    'step_share': 0,
     'tick_per_day': 3,
-    'number_days': 20,
+    'number_days': 80,
     'split': (9, 1),  # make a function for K-fold validationb
 }
+# https://yanglin1997.github.io/files/TCAN.pdf
+kernel = 2
+num_layer_dail = int(np.log2((80 * 3 / (kernel - 1)) + 1))
+
 # FIND MODEL CONFIG BASED ON DATALOADER
 lit_data = LitNyData(df, config_data_loader)
 lit_val = lit_data.val_loader
 in_shape, out_shape = None, None
-
+list_of_lists = list([[2 ** i for _ in range(1)] for i in range(num_layer_dail)])
+flattened = [val for sublist in list_of_lists for val in sublist]
 config_CasualRnn = {
-    'bottleneck_channels': 128,
-    'hidden_channels': 32,
+    'bottleneck_channels': 8,
+    'hidden_channels': 3,
     'kernel_sizes': ((10, 20, 40), (10, 20, 40), (10, 20, 40)),
-    'num_stack_layers': 1,
+    'num_stack_layers': 2,
     'dropout': 0.4,
-    'kernel_avg':4,
+    'kernel_avg': 4,
+    'out_channels': 3,
+    'kernels': 2,
+    'dilation': flattened,
+    # 'in_channels': 4,
+    # 'inception_bottleneck_channels': 1,
 }
 in_sample = None
 

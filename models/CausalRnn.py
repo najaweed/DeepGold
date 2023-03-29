@@ -17,21 +17,21 @@ class CausalRnn(nn.Module):
             dropout=config['dropout'],
         )
         self.inception1 = InceptionBlock(
-            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            in_channels=config['in_channels'],  # 4 * config['hidden_channels'],
             bottleneck_channels=config['bottleneck_channels'],
             hidden_channels=config['hidden_channels'],
             kernel_sizes=config['kernel_sizes'],
             dropout=config['dropout'],
         )
         self.inception2 = InceptionBlock(
-            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            in_channels=config['in_channels'],  # 4 * config['hidden_channels'],
             bottleneck_channels=config['bottleneck_channels'],
             hidden_channels=config['hidden_channels'],
             kernel_sizes=config['kernel_sizes'],
             dropout=config['dropout'],
         )
         self.inception3 = InceptionBlock(
-            in_channels=config['in_channels'],#4 * config['hidden_channels'],
+            in_channels=config['in_channels'],  # 4 * config['hidden_channels'],
             bottleneck_channels=config['bottleneck_channels'],
             hidden_channels=config['hidden_channels'],
             kernel_sizes=config['kernel_sizes'],
@@ -48,7 +48,7 @@ class CausalRnn(nn.Module):
         self.dropout0 = nn.Dropout(config['dropout'])
 
         self.batch_norm = nn.BatchNorm1d(num_features=config['in_channels'])
-        self.avg_pool = nn.MaxPool1d(kernel_size=config['kernel_avg'],)
+        self.avg_pool = nn.MaxPool1d(kernel_size=config['kernel_avg'], )
         # self.activ = nn.ReLU()
 
         self.init_weights()
@@ -66,11 +66,12 @@ class CausalRnn(nn.Module):
         for name, param in self.inception1.named_parameters():
             nn.init.constant_(param, 0.0)  # .normal_(param, mean=0, std=0.01)
         for name, param in self.inception2.named_parameters():
-            nn.init.constant_(param, 0.0)#.normal_(param, mean=0, std=0.01)
+            nn.init.constant_(param, 0.0)  # .normal_(param, mean=0, std=0.01)
         for name, param in self.inception3.named_parameters():
-            nn.init.constant_(param, 0.0)#.normal_(param, mean=0, std=0.01)
+            nn.init.constant_(param, 0.0)  # .normal_(param, mean=0, std=0.01)
         for name, param in self.batch_norm.named_parameters():
             nn.init.constant_(param, 0.0)
+
     def forward(self, x):
         batch_size = x.shape[0]
         # Inception
@@ -78,8 +79,8 @@ class CausalRnn(nn.Module):
         x0 = self.batch_norm(x)
         x = self.inception(x0)
         x = x + self.dropout1(self.inception1(x0))
-        #x = x + self.dropout2(self.inception2(x0))
-        #x = x + self.dropout3(self.inception3(x0))
+        # x = x + self.dropout2(self.inception2(x0))
+        # x = x + self.dropout3(self.inception3(x0))
 
         x = self.avg_pool(x)
         x = self.dropout0(x)
@@ -108,4 +109,3 @@ class CausalRnn(nn.Module):
 # model = CausalRnn(x_config)
 # out = model(x_in)
 # print(out.shape)
-

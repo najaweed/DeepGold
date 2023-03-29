@@ -52,6 +52,7 @@ class NyDiffNormalizer:
 
     def prediction_to_ohlc_df(self, nn_prediction: np.ndarray):
         # inverse normalizer
+        print(self.min)
         normal_prediction = (nn_prediction * self.scale_normal) + self.min
         p_df = self.df.iloc[-1, :].copy()
         # p_df[['high', 'low', 'close']] = normal_prediction.reshape(-1, len(normal_prediction))

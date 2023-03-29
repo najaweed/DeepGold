@@ -48,9 +48,10 @@ class NyDataset(Dataset):
                  data_temporal: pd.DataFrame,
                  config: dict,
                  ):
+
         self.time_series = data_temporal
         self.step_predict = 1
-        self.step_share = 0
+        self.step_share = config['step_share']
         self.tick_per_day = config['tick_per_day']
         self.num_days = config['number_days']
         self.window_temporal = self.tick_per_day * self.num_days
@@ -70,7 +71,7 @@ class NyDataset(Dataset):
 
             x_df = self.time_series.iloc[t:(t + self.window_temporal), :].copy()
             # print(x_df)
-            ny_normal = NyDiffNormalizer(x_df)
+            ny_normal = NyDiffNormalizer(x_df,step_share=self.step_share)
             obs = ny_normal.obs()
             target = ny_normal.target()
             if t == 0:
@@ -119,7 +120,7 @@ class LitNyData(pl.LightningDataModule, ):
             dataset = NyDataset(self.df.iloc[start_index:end_index, :], self.config)
             data_loaders.append(DataLoader(dataset=dataset,
                                            batch_size=self.config['batch_size'],
-                                           # num_workers=4,
+                                           #num_workers=8,
                                            drop_last=True,
                                            # pin_memory=True,
                                            shuffle=False,

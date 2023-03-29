@@ -98,7 +98,6 @@ class InceptionBlock(nn.Module):
 
         )
 
-
     def forward(self, x):
         x1 = self.inception_1(x)
         # x2 = x1 + self.dropout1(self.inception_2(x))

@@ -13,13 +13,13 @@ if not mt5.initialize():
 
 
 def get_last_day(symbol: str, shift_5m=400, s=0):
-    ticks = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M30, s, shift_5m))
+    ticks = pd.DataFrame(mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, s, shift_5m))
     ticks['time'] = pd.to_datetime(ticks['time'], unit='s')
     ticks = ticks.set_index('time')
     return ticks
 
 
-xau = get_last_day('XAUUSD', shift_5m=99999, s=0)
+xau = get_last_day('XAUUSD', shift_5m=28000, s=0)
 
 
 def session_transform(sessions, x_df):
